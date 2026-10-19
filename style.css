@@ -1,0 +1,175 @@
+body {
+  background-color: #100d18;
+  color: #f8f5ff;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.navbar-vibe {
+  background-color: #171222;
+  border-bottom: 1px solid #30243f;
+}
+
+.navbar-brand span,
+.hero h1 span {
+  color: #c49aff;
+}
+
+.hero {
+  background: linear-gradient(125deg, #281b3e, #171222 72%);
+  border: 1px solid #3c2a55;
+}
+
+.label-vibe {
+  color: #c49aff;
+  letter-spacing: 1.5px;
+}
+
+.hero-text {
+  color: #c1b8d0;
+  max-width: 600px;
+}
+
+.form-control,
+.form-select {
+  background-color: #171222;
+  color: #f8f5ff;
+  border-color: #49365e;
+}
+
+.form-control::placeholder {
+  color: #9c91ac;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: #171222;
+  color: #fff;
+  border-color: #b28af0;
+  box-shadow: 0 0 0 .2rem #a675e833;
+}
+
+.form-select option {
+  background: #171222;
+  color: #fff;
+}
+
+.btn-vibe {
+  background-color: #a879eb;
+  border-color: #a879eb;
+  color: #1a1025;
+  font-weight: bold;
+}
+
+.btn-vibe:hover {
+  background-color: #c49aff;
+  border-color: #c49aff;
+  color: #1a1025;
+}
+
+.btn-outline-vibe {
+  color: #d4b8ff;
+  border-color: #9e72d7;
+}
+
+.btn-outline-vibe:hover {
+  background-color: #9e72d7;
+  color: #fff;
+}
+
+.filter-area {
+  background-color: #191423;
+  border: 1px solid #30243f;
+}
+
+.music-card {
+  height: 100%;
+  background-color: #1b1626;
+  border: 1px solid #332541;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform .2s, border-color .2s;
+}
+
+.music-card:hover {
+  transform: translateY(-3px);
+  border-color: #9e72d7;
+}
+
+.music-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.music-card .card-body {
+  padding: 14px;
+}
+
+.music-card .card-title {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.music-card .card-text {
+  color: #b8adc9;
+  font-size: .875rem;
+}
+
+.badge-vibe {
+  display: inline-block;
+  color: #d9c3ff;
+  background-color: #38264d;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: .7rem;
+}
+
+.preview-button {
+  width: 100%;
+}
+
+#mensagem {
+  color: #d0c5df;
+  background-color: #1b1626;
+}
+
+.extra-info {
+  background: linear-gradient(110deg, #231832, #171222);
+  border: 1px solid #38264d;
+  color: #c8bed6;
+}
+
+.extra-info h3 {
+  color: #fff;
+}
+
+.footer-vibe {
+  border-top: 1px solid #30243f;
+  background-color: #0c0a12;
+  color: #d9d1e5;
+  font-size: .85rem;
+}
+
+.student-info {
+  text-align: right;
+  color: #a89cb8;
+}
+
+.student-info strong {
+  color: #e9e0f4;
+}
+
+@media (max-width: 767px) {
+  .navbar-text {
+    display: none;
+  }
+
+  .student-info {
+    text-align: left;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+}

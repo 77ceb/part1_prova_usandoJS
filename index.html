@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeMusic | Descubra sua próxima música</title>
+
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar navbar-dark navbar-expand-lg navbar-vibe">
+    <div class="container">
+      <a class="navbar-brand fw-bold fs-3" href="#">♫ Vibe<span>Music</span></a>
+      <span class="navbar-text small">Descubra sua próxima vibe</span>
+    </div>
+  </nav>
+
+  <main class="container py-4 py-md-5">
+    <section class="hero p-4 p-md-5 mb-5 rounded-4">
+      <p class="text-uppercase small fw-bold label-vibe mb-2">Sua música, do seu jeito</p>
+      <h1 class="display-4 fw-bold">Qual é a sua <span>vibe hoje?</span></h1>
+      <p class="hero-text mt-3 mb-4">Pesquise músicas, conheça artistas e explore álbuns de vários estilos.</p>
+
+      <form id="formPesquisa" class="row g-2" onsubmit="pesquisar(); return false;">
+        <div class="col-12 col-md-7">
+          <label for="pesquisa" class="visually-hidden">Nome da música ou artista</label>
+          <input id="pesquisa" class="form-control form-control-lg" type="search"
+                 placeholder="Digite uma música ou artista...">
+        </div>
+        <div class="col-12 col-md-3">
+          <label for="tipo" class="visually-hidden">Tipo de resultado</label>
+          <select id="tipo" class="form-select form-select-lg">
+            <option value="song">Músicas</option>
+            <option value="album">Álbuns</option>
+            <option value="musicArtist">Artistas</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-2 d-grid">
+          <button class="btn btn-vibe btn-lg" type="submit">Buscar</button>
+        </div>
+      </form>
+
+      <p class="small text-secondary mt-3 mb-0">Você também pode escolher um gênero abaixo para explorar músicas sem digitar um nome.</p>
+    </section>
+
+    <section>
+      <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
+        <div>
+          <p class="text-uppercase small fw-bold label-vibe mb-1">Explore o catálogo</p>
+          <h2 id="tituloResultados" class="h2 fw-bold mb-0">Músicas para descobrir</h2>
+        </div>
+        <p id="quantidade" class="small text-secondary mb-1"></p>
+      </div>
+
+  
+      <div class="row g-2 align-items-end filter-area rounded-3 p-3 mb-4">
+        <div class="col-12 col-sm-5 col-md-4">
+          <label for="genero" class="form-label small">Explorar por gênero</label>
+          <select id="genero" class="form-select" onchange="document.getElementById('pesquisa').value = ''; pesquisar();">
+            <option value="">Escolha um gênero (opcional)</option>
+            <option value="Pop">Pop</option>
+            <option value="Rock">Rock</option>
+            <option value="hip hop">Hip-Hop/Rap</option>
+            <option value="r&b soul">R&B/Soul</option>
+            <option value="MPB">MPB</option>
+            <option value="electronic">Eletrônica</option>
+            <option value="alternative music">Alternativa</option>
+          </select>
+        </div>
+        <div class="col-12 col-sm-4 col-md-3">
+          <label for="limite" class="form-label small">Quantidade de resultados</label>
+          <select id="limite" class="form-select" onchange="pesquisar();">
+            <option value="12">12 resultados</option>
+            <option value="24">24 resultados</option>
+            <option value="48">48 resultados</option>
+          </select>
+        </div>
+        <div class="col-12 col-sm-3 col-md-2 d-grid">
+          <button id="btnFiltrar" class="btn btn-outline-vibe" type="button" onclick="pesquisar();">Aplicar</button>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <button class="btn btn-outline-vibe" type="button" onclick="pesquisarArtistas();">Pesquisar artistas</button>
+        <button class="btn btn-outline-vibe" type="button" onclick="buscarDiscografia();">Consultar discografia</button>
+        <div class="form-check ms-md-2">
+          <input class="form-check-input" type="checkbox" id="removerRepetidos" onchange="atualizarRepeticoes();">
+          <label class="form-check-label" for="removerRepetidos">Remover resultados repetidos</label>
+        </div>
+      </div>
+
+      <div id="mensagem" class="alert alert-dark border-0" role="status">Escolha um gênero ou pesquise uma música.</div>
+      <div id="resultados" class="row g-3"></div>
+    </section>
+
+    <section class="extra-info rounded-4 p-4 mt-5">
+      <h3 class="h5 fw-bold">🎧 Descubra sons novos</h3>
+      <p class="mb-0">Pesquise, explore diferentes estilos e reproduza uma prévia quando ela estiver disponível.</p>
+    </section>
+  </main>
+
+  <footer class="footer-vibe py-4">
+    <div class="container d-flex flex-column flex-md-row justify-content-between gap-2">
+      <div><strong>♫ VibeMusic</strong> <span class="text-secondary">— Projeto acadêmico com a iTunes Search API.</span></div>
+      <div class="student-info">
+        <div>Aluno(a): <strong>Carlos Eduardo Bento</strong></div>
+        <div>Disciplina: <strong>Desenvolvimento Web</strong></div>
+      </div>
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="script.js"></script>
+</body>
+</html>
