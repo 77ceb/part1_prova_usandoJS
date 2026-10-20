@@ -160,6 +160,17 @@ body {
   color: #e9e0f4;
 }
 
+.modal-vibe .modal-content {
+  background-color: #171222;
+  color: #f8f5ff;
+  border: 1px solid #49365e;
+}
+
+.modal-vibe .modal-header,
+.modal-vibe .modal-footer {
+  border-color: #30243f;
+}
+
 @media (max-width: 767px) {
   .navbar-text {
     display: none;

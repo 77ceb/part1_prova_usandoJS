@@ -1,30 +1,105 @@
+
+// Variáveis globais
 var ultimosResultados = [];
 var ultimoTitulo = "";
 
-// 1. Pesquisa músicas e álbuns.
+var MATRICULA = "461554";
+var LOGS_API = "https://www.piway.com.br/unoesc/api";
+
+// Registra logs na API
+async function registrarLog(metodo, resultado) {
+  var texto = String(resultado).substring(0, 120);
+  var url = LOGS_API + "/inserir/log/" + MATRICULA + "/iTunes/"
+    + encodeURIComponent(metodo) + "/" + encodeURIComponent(texto);
+
+  try {
+    await fetch(url);
+  } catch (erro) {
+    console.log("Não foi possível registrar o log.");
+  }
+}
+
+// Carrega e exibe os logs
+async function carregarListaLogs() {
+  var area = document.getElementById("listaLogs");
+  area.innerHTML = "<p>Carregando logs...</p>";
+
+  try {
+    var resposta = await fetch(LOGS_API + "/logs/" + MATRICULA);
+    var dados = await resposta.json();
+
+    if (!resposta.ok || typeof dados === "string") {
+      area.innerHTML = "<p>" + (dados || "Erro ao carregar logs.") + "</p>";
+      return;
+    }
+
+    if (dados.length == 0) {
+      area.innerHTML = "<p>Nenhum log registrado ainda.</p>";
+      return;
+    }
+
+    var html = `<div class="table-responsive">
+      <table class="table table-dark table-striped table-sm">
+      <thead><tr><th>Data</th><th>API</th><th>Método</th>
+      <th>Resultado</th><th></th></tr></thead><tbody>`;
+
+    for (var i = 0; i < dados.length; i++) {
+      var log = dados[i];
+
+      html += `<tr>
+        <td>${log.log || "—"}</td>
+        <td>${log.api || "—"}</td>
+        <td>${log.metodo || "—"}</td>
+        <td>${log.resultado || "—"}</td>
+        <td><button class="btn btn-sm btn-outline-danger"
+        onclick="excluirLog(${log.idlog})">Excluir</button></td>
+      </tr>`;
+    }
+
+    area.innerHTML = html + "</tbody></table></div>";
+  } catch (erro) {
+    area.innerHTML = "<p>Não foi possível carregar os logs.</p>";
+  }
+}
+
+// Abre o modal de logs
+function vizuLog() {
+  var elemento = document.getElementById("modalLogs");
+  bootstrap.Modal.getOrCreateInstance(elemento).show();
+  carregarListaLogs();
+}
+
+// Exclui um log
+async function excluirLog(idLog) {
+  try {
+    await fetch(LOGS_API + "/excluir/log/" + idLog + "/aluno/" + MATRICULA);
+    await carregarListaLogs();
+  } catch (erro) {
+    mostrarMensagem("Não foi possível excluir o log.");
+  }
+}
+
+// Pesquisa músicas e álbuns
 async function pesquisar() {
   var nome = document.getElementById("pesquisa").value.trim();
   var genero = document.getElementById("genero").value;
   var tipo = document.getElementById("tipo").value;
   var limite = document.getElementById("limite").value;
-  var termo = nome;
-
-  if (termo == "") {
-    termo = genero;
-  }
+  var termo = nome || genero;
 
   if (termo == "") {
     mostrarMensagem("Digite um nome ou escolha um gênero.");
     return;
   }
 
-  var endereco = "https://itunes.apple.com/search?term=" + encodeURIComponent(termo);
-  endereco = endereco + "&entity=" + tipo + "&limit=" + limite + "&country=BR";
+  var endereco = "https://itunes.apple.com/search?term="
+    + encodeURIComponent(termo)
+    + "&entity=" + tipo + "&limit=" + limite + "&country=BR";
 
-  await consultarAPI(endereco, "Resultados para: " + termo);
+  await consultarAPI(endereco, "Resultados para: " + termo, "pesquisar-" + tipo);
 }
 
-// 2. Pesquisa artistas.
+// Pesquisa artistas
 async function pesquisarArtistas() {
   var nome = document.getElementById("pesquisa").value.trim();
   var limite = document.getElementById("limite").value;
@@ -34,13 +109,14 @@ async function pesquisarArtistas() {
     return;
   }
 
-  var endereco = "https://itunes.apple.com/search?term=" + encodeURIComponent(nome);
-  endereco = endereco + "&entity=musicArtist&limit=" + limite + "&country=BR";
+  var endereco = "https://itunes.apple.com/search?term="
+    + encodeURIComponent(nome)
+    + "&entity=musicArtist&limit=" + limite + "&country=BR";
 
-  await consultarAPI(endereco, "Artistas encontrados para: " + nome);
+  await consultarAPI(endereco, "Artistas encontrados para: " + nome, "pesquisarArtistas");
 }
 
-// 3. Procura um artista e depois consulta seus álbuns com lookup.
+// Busca o artista e depois seus álbuns
 async function buscarDiscografia() {
   var nome = document.getElementById("pesquisa").value.trim();
   var limite = document.getElementById("limite").value;
@@ -53,31 +129,32 @@ async function buscarDiscografia() {
   mostrarMensagem("Procurando artista...");
 
   try {
-    var enderecoArtista = "https://itunes.apple.com/search?term=" + encodeURIComponent(nome);
-    enderecoArtista = enderecoArtista + "&entity=musicArtist&limit=1&country=BR";
+    var urlArtista = "https://itunes.apple.com/search?term="
+      + encodeURIComponent(nome)
+      + "&entity=musicArtist&limit=1&country=BR";
 
-    var respostaArtista = await fetch(enderecoArtista);
+    var respostaArtista = await fetch(urlArtista);
     var dadosArtista = await respostaArtista.json();
 
-    if (respostaArtista.ok == false) {
-      throw new Error("Erro ao procurar artista");
-    }
+    if (!respostaArtista.ok) throw new Error("Erro ao procurar artista");
 
     if (dadosArtista.results.length == 0) {
       mostrarMensagem("Artista não encontrado.");
+      await registrarLog("buscarDiscografia-artista", "0 artistas encontrados");
       return;
     }
 
     var artista = dadosArtista.results[0];
-    var enderecoAlbuns = "https://itunes.apple.com/lookup?id=" + artista.artistId;
-    enderecoAlbuns = enderecoAlbuns + "&entity=album&limit=" + limite + "&country=BR";
+    await registrarLog("buscarDiscografia-artista", artista.artistName);
 
-    var respostaAlbuns = await fetch(enderecoAlbuns);
+    var urlAlbuns = "https://itunes.apple.com/lookup?id="
+      + artista.artistId
+      + "&entity=album&limit=" + limite + "&country=BR";
+
+    var respostaAlbuns = await fetch(urlAlbuns);
     var dadosAlbuns = await respostaAlbuns.json();
 
-    if (respostaAlbuns.ok == false) {
-      throw new Error("Erro ao procurar álbuns");
-    }
+    if (!respostaAlbuns.ok) throw new Error("Erro ao procurar álbuns");
 
     var albuns = [];
 
@@ -87,59 +164,61 @@ async function buscarDiscografia() {
       }
     }
 
+    await registrarLog("buscarDiscografia-albuns", albuns.length + " albuns");
     mostrarResultados(albuns, "Discografia de: " + artista.artistName);
   } catch (erro) {
     mostrarMensagem("Não foi possível consultar a discografia. Tente novamente.");
   }
 }
 
-// Faz a consulta à API e trata possíveis erros.
-async function consultarAPI(endereco, titulo) {
+// Consulta a API e exibe os resultados
+async function consultarAPI(endereco, titulo, metodoLog) {
   mostrarMensagem("Consultando a API do iTunes...");
 
   try {
     var resposta = await fetch(endereco);
 
-    if (resposta.ok == false) {
-      throw new Error("Erro na consulta");
-    }
+    if (!resposta.ok) throw new Error("Erro na consulta");
 
     var dados = await resposta.json();
+    var qtd = dados.resultCount;
+
+    if (qtd == undefined && dados.results != undefined) {
+      qtd = dados.results.length;
+    }
+
+    await registrarLog(metodoLog, qtd + " resultados");
     mostrarResultados(dados.results, titulo);
   } catch (erro) {
     mostrarMensagem("Não foi possível consultar a API. Confira a conexão e tente novamente.");
   }
 }
 
-// Mostra uma mensagem na página.
+// Exibe uma mensagem e limpa os resultados
 function mostrarMensagem(texto) {
   document.getElementById("mensagem").innerHTML = texto;
   document.getElementById("quantidade").innerHTML = "";
   document.getElementById("resultados").innerHTML = "";
 }
 
-// Mostra os resultados e, se solicitado, remove itens repetidos.
+// Exibe os resultados e remove duplicados, se necessário
 function mostrarResultados(itens, titulo) {
   ultimosResultados = itens;
   ultimoTitulo = titulo;
 
   var lista = [];
-  var removerRepetidos = document.getElementById("removerRepetidos").checked;
+  var remover = document.getElementById("removerRepetidos").checked;
 
-  if (removerRepetidos == true) {
+  if (remover) {
     for (var i = 0; i < itens.length; i++) {
       var id = pegarId(itens[i]);
       var repetido = false;
 
       for (var j = 0; j < lista.length; j++) {
-        if (id == pegarId(lista[j])) {
-          repetido = true;
-        }
+        if (id == pegarId(lista[j])) repetido = true;
       }
 
-      if (repetido == false) {
-        lista.push(itens[i]);
-      }
+      if (!repetido) lista.push(itens[i]);
     }
   } else {
     lista = itens;
@@ -150,83 +229,62 @@ function mostrarResultados(itens, titulo) {
   document.getElementById("tituloResultados").innerHTML = titulo;
 
   if (lista.length == 0) {
-    document.getElementById("mensagem").innerHTML = "Nenhum resultado encontrado. Tente outra pesquisa.";
+    document.getElementById("mensagem").innerHTML =
+      "Nenhum resultado encontrado. Tente outra pesquisa.";
     document.getElementById("quantidade").innerHTML = "0 resultados";
     return;
   }
 
   for (var k = 0; k < lista.length; k++) {
-    area.innerHTML = area.innerHTML + criarCartao(lista[k]);
+    area.innerHTML += criarCartao(lista[k]);
   }
 
   document.getElementById("mensagem").innerHTML = "Consulta concluída.";
-  document.getElementById("quantidade").innerHTML = lista.length + " resultados exibidos";
+  document.getElementById("quantidade").innerHTML =
+    lista.length + " resultados exibidos";
 }
 
-// Retorna o identificador de uma música, álbum ou artista.
+// Obtém o ID de música, álbum ou artista
 function pegarId(item) {
-  if (item.trackId != undefined) {
-    return item.trackId;
-  }
-
-  if (item.collectionId != undefined) {
-    return item.collectionId;
-  }
-
+  if (item.trackId != undefined) return item.trackId;
+  if (item.collectionId != undefined) return item.collectionId;
   return item.artistId;
 }
 
-// Monta um cartão para cada resultado.
+// Cria o cartão de cada resultado
 function criarCartao(item) {
-  var nome = item.trackName;
-  var artista = item.artistName;
+  var nome = item.trackName || item.collectionName
+    || item.artistName || "Nome não informado";
+
+  var artista = item.artistName || "Artista não informado";
   var capa = item.artworkUrl100;
   var previa = item.previewUrl;
-  var link = item.trackViewUrl;
+  var link = item.trackViewUrl || item.collectionViewUrl || item.artistLinkUrl;
 
-  if (nome == undefined) {
-    nome = item.collectionName;
-  }
-  if (nome == undefined) {
-    nome = item.artistName;
-  }
-  if (nome == undefined) {
-    nome = "Nome não informado";
-  }
-  if (artista == undefined) {
-    artista = "Artista não informado";
-  }
-  if (link == undefined) {
-    link = item.collectionViewUrl;
-  }
-  if (link == undefined) {
-    link = item.artistLinkUrl;
+  var cartao = `<div class="col-6 col-md-4 col-lg-3">
+    <div class="music-card h-100">`;
+
+  if (capa) {
+    cartao += `<img src="${capa}" alt="Capa ou imagem da música">`;
   }
 
-  var cartao = `<div class="col-6 col-md-4 col-lg-3"><div class="music-card h-100">`;
+  cartao += `<div class="card-body">
+    <h3 class="card-title mt-2">${nome}</h3>
+    <p class="card-text">${artista}</p>`;
 
-  if (capa != undefined) {
-    cartao = cartao + `<img src="${capa}" alt="Capa ou imagem da música">`;
+  cartao += previa
+    ? `<audio controls class="w-100 mt-2" src="${previa}"></audio>`
+    : `<p class="small text-secondary">Prévia indisponível</p>`;
+
+  if (link) {
+    cartao += `<a class="btn btn-sm btn-outline-light w-100 mt-2"
+      href="${link}" target="_blank" rel="noopener">Ver no iTunes</a>`;
   }
 
-  cartao = cartao + `<div class="card-body"><h3 class="card-title mt-2">${nome}</h3>`;
-  cartao = cartao + `<p class="card-text">${artista}</p>`;
-
-  if (previa != undefined) {
-    cartao = cartao + `<audio controls class="w-100 mt-2" src="${previa}"></audio>`;
-  } else {
-    cartao = cartao + `<p class="small text-secondary">Prévia indisponível</p>`;
-  }
-
-  if (link != undefined) {
-    cartao = cartao + `<a class="btn btn-sm btn-outline-light w-100 mt-2" href="${link}" target="_blank" rel="noopener">Ver no iTunes</a>`;
-  }
-
-  cartao = cartao + `</div></div></div>`;
-  return cartao;
+  return cartao + "</div></div></div>";
 }
 
-// Atualiza a lista quando a caixa de repetidos mudar.
+// Atualiza os resultados quando o filtro mudar
 function atualizarRepeticoes() {
   if (ultimosResultados.length > 0) {
     mostrarResultados(ultimosResultados, ultimoTitulo);
